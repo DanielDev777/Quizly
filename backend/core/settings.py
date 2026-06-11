@@ -162,8 +162,6 @@ MEDIA_URL = '/media/'
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 WHISPER_MODEL = os.getenv('WHISPER_MODEL', 'base')
 
-AUTH_USER_MODEL = 'auth_app.User'
-
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]

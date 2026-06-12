@@ -23,8 +23,6 @@ class QuizModelTests(TestCase):
             title='Test Quiz',
             description='Test Description',
             youtube_url='https://www.youtube.com/watch?v=test',
-            video_title='Test Video',
-            video_duration=120,
             transcription='Test transcription'
         )
         

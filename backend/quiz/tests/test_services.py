@@ -1,6 +1,7 @@
 from django.test import TestCase
 from unittest.mock import patch, MagicMock
 from quiz.services.youtube_service import YouTubeTranscriptionService
+from quiz.services.gemini_service import GeminiQuizGenerator
 
 class YouTubeServiceTests(TestCase):
     """Test YouTube transcription service"""
@@ -54,3 +55,55 @@ class YouTubeServiceTests(TestCase):
         
         self.assertEqual(result['text'], 'This is a test transcription')
         self.assertEqual(result['language'], 'en')
+
+class GeminiServiceTests(TestCase):
+    """Test Gemini quiz generation service"""
+    
+    @patch('google.genai.Client')
+    def test_generate_quiz(self, mock_client):
+        mock_response = MagicMock()
+        mock_response.text = '''{
+            "title": "Python Quiz",
+            "description": "A quiz about Python",
+            "questions": [
+                {
+                    "question_title": "What is Python?",
+                    "question_options": ["A programming language", "A snake", "A food", "A game"],
+                    "answer": "A programming language"
+                }
+            ]
+        }'''
+
+        mock_instance = MagicMock()
+        mock_instance.models.generate_content.return_value = mock_response
+        mock_client.return_value = mock_instance
+
+        service = GeminiQuizGenerator()
+        result = service.generate_quiz('Test transcription about Python')
+
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]['question_title'], 'What is Python?')
+        self.assertEqual(len(result[0]['question_options']), 4)
+
+    def test_validate_questions_success(self):
+        service = GeminiQuizGenerator()
+        questions = [
+            {
+                "question_title": "Test?",
+                "question_options": ["A", "B", "C", "D"],
+                "answer": "A"
+            }
+        ]
+        service._validate_questions(questions)
+
+    def test_validate_questions_answer_not_in_options(self):
+        service = GeminiQuizGenerator()
+        questions = [
+            {
+                "question_title": "Test?",
+                "question_options": ["A", "B", "C", "D"],
+                "answer": "E"  # not in options
+            }
+        ]
+        with self.assertRaises(ValueError):
+            service._validate_questions(questions)

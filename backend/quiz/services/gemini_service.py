@@ -20,7 +20,7 @@ class GeminiQuizGenerator:
 
         try:
             response = self.client.models.generate_content(
-                model="gemini-3.5-flash",
+                model="gemini-3.1-flash-lite",
                 contents=prompt
             )
 
@@ -93,6 +93,8 @@ class GeminiQuizGenerator:
     def _validate_questions(self, questions: List[Dict]):
         if not isinstance(questions, list):
             raise ValueError("Response must be a list of questions")
+        if len(questions) != 10:
+            raise ValueError(f"Expected 10 questions, got {len(questions)}")
         for i, q in enumerate(questions):
             if 'question_title' not in q:
                 raise ValueError(f"Question {i} missing 'question_title'")

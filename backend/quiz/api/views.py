@@ -56,10 +56,7 @@ class QuizViewSet(viewsets.ModelViewSet):
             result = youtube_service.process_youtube_video(youtube_url)
 
             gemini_service = GeminiQuizGenerator()
-            questions_data = gemini_service.generate_quiz(
-                transcription=result['transcription'],
-                num_questions=5
-            )
+            questions_data = gemini_service.generate_quiz(transcription=result['transcription'])
 
             quiz = Quiz.objects.create(
                 user=request.user,
@@ -72,23 +69,21 @@ class QuizViewSet(viewsets.ModelViewSet):
             for idx, q_data in enumerate(questions_data):
                 question = Question.objects.create(
                     quiz=quiz,
-                    question_text=q_data['question_text'],
-                    difficulty=q_data.get('difficulty', 'medium'),
+                    question_text=q_data['question_title'],
                     order=idx
                 )
-                
-                for ans_idx, ans_data in enumerate(q_data['answers']):
+                for ans_idx, option in enumerate(q_data['question_options']):
                     Answer.objects.create(
                         question=question,
-                        answer_text=ans_data['answer_text'],
-                        is_correct=ans_data['is_correct'],
+                        answer_text=option,
+                        is_correct=(option == q_data['answer']),
                         order=ans_idx
                     )
 
-                return Response(
-                    QuizDetailSerializer(quiz).data,
-                    status=status.HTTP_201_CREATED
-                )
+            return Response(
+                QuizDetailSerializer(quiz).data,
+                status=status.HTTP_201_CREATED
+            )
         
         except Exception as e:
             return Response(

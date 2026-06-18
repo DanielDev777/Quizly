@@ -57,6 +57,29 @@ python manage.py runserver
 
 Visit http://localhost:8000/admin to access the admin panel.
 
+## 🖥️ Accessing the Frontend
+
+The frontend is a static site located in the `frontend/` folder. There are two ways to open it:
+
+**Option 1 — Django (recommended, no extra setup)**
+
+Django serves the frontend directly. After starting the backend server, open:
+```
+http://localhost:8000
+```
+
+**Option 2 — Live Server / separate file server**
+
+You can also serve the `frontend/` folder with VS Code Live Server or any static file server. The following ports are pre-configured and allowed by CORS:
+
+| Port | Typical use |
+|------|-------------|
+| 8000 | Django dev server (serves frontend + API) |
+| 5500 | VS Code Live Server |
+| 3000 | Node-based dev servers |
+
+> **Important:** Regardless of which port you serve the frontend from, the backend API must always be running on **port 8000**. The frontend is hardcoded to send API requests to `localhost:8000`.
+
 ## 🔌 API Endpoints
 
 ### Authentication

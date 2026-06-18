@@ -33,7 +33,7 @@ function renderTodayQuizzes() {
     if (isToday(quiz.created_at)) {
       let quizIndex = quiz.id;
       let li = document.createElement("li");
-      li.setAttribute("onclick", `changeOverviewToQuiz(${quizIndex})`);
+      li.setAttribute("onclick", `changeOverviewToQuiz('${quizIndex}')`);
       li.innerHTML = quiz.title;
       if (todayContainer.childElementCount <= 5) {
         todayContainer.appendChild(li);
@@ -50,7 +50,7 @@ function renderLast7DaysQuizzes() {
     if (isOlderThan7Days(quiz.created_at)) {
       let quizIndex = quiz.id;
       let li = document.createElement("li");
-      li.setAttribute("onclick", `changeOverviewToQuiz(${quizIndex})`);
+      li.setAttribute("onclick", `changeOverviewToQuiz('${quizIndex}')`);
       li.innerHTML = quiz.title;
 
       if (sevenDaysContainer.childElementCount <= 5) {

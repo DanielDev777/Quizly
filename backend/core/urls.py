@@ -17,12 +17,18 @@ Including another URLconf
 from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
-from django.urls import path, include
+from django.urls import path, include, re_path
+from django.views.static import serve
+import os
+
+FRONTEND_DIR = os.path.join(settings.BASE_DIR.parent, 'frontend')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('auth_app.api.urls')),
     path('api/', include('quiz.api.urls')),
+    # Serve frontend files so frontend + API share the same origin (port 8000)
+    re_path(r'^(?P<path>.*)$', serve, {'document_root': FRONTEND_DIR, 'show_indexes': True}),
 ]
 
 if settings.DEBUG:

@@ -27,10 +27,7 @@ function createQuizCard(quiz, i) {
   const container = document.createElement("div");
   container.classList.add(`quiz-card`);
   container.id = `quiz-card-${i}`;
-  container.setAttribute(
-    "onclick",
-    `openQuiz('${container.id.split("-")[2]}')`,
-  );
+  container.setAttribute("onclick", `openQuiz('${i}')`);
   container.classList.add("d_flex_cc_ac");
   container.classList.add("flex_dir_col");
 

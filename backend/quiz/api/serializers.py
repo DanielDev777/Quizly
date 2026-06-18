@@ -1,68 +1,67 @@
 from rest_framework import serializers
 from quiz.models import Quiz, Question, Answer
 
-class AnswerSerializer(serializers.ModelSerializer):
-    """Serializer for answer choices"""
-    class Meta:
-        model = Answer
-        fields = ['id', 'answer_text', 'is_correct', 'order']
-        read_only_fields = ['id']
 
 class QuestionSerializer(serializers.ModelSerializer):
-    """Serializer for questions with nested answers"""
-    answers = AnswerSerializer(many=True, read_only=True)
-    
+    """
+    Serializer for a question in the spec format:
+    { id, question_title, question_options: [...], answer: "correct text" }
+    """
+    question_title = serializers.CharField(source='question_text')
+    question_options = serializers.SerializerMethodField()
+    answer = serializers.SerializerMethodField()
+
     class Meta:
         model = Question
-        fields = ['id', 'question_text', 'difficulty', 'order', 'answers']
-        read_only_fields = ['id']
+        fields = ['id', 'question_title', 'question_options', 'answer', 'created_at', 'updated_at']
 
-class QuizListSerializer(serializers.ModelSerializer):
-    """Serializer for quiz list view (lighter payload, no full questions)"""
-    question_count = serializers.SerializerMethodField()
-    
+    def get_question_options(self, obj):
+        """Return all answer texts as a plain list of strings."""
+        return list(obj.answers.values_list('answer_text', flat=True))
+
+    def get_answer(self, obj):
+        """Return the text of the correct answer."""
+        correct = obj.answers.filter(is_correct=True).first()
+        return correct.answer_text if correct else None
+
+
+class QuizSerializer(serializers.ModelSerializer):
+    """
+    Full quiz serializer matching the spec response shape:
+    { id, title, description, created_at, updated_at, video_url, questions: [...] }
+    """
+    video_url = serializers.CharField(source='youtube_url')
+    questions = QuestionSerializer(many=True, read_only=True)
+
     class Meta:
         model = Quiz
         fields = [
-            'id', 'title', 'description', 'youtube_url',
-            'question_count', 'created_at', 'updated_at'
+            'id', 'title', 'description',
+            'created_at', 'updated_at',
+            'video_url', 'questions',
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
-    def get_question_count(self, obj):
-        return obj.questions.count()
-    
-class QuizDetailSerializer(serializers.ModelSerializer):
-    """Serializer for detailed quiz view with all questions"""
-    questions = QuestionSerializer(many=True, read_only=True)
-    question_count = serializers.SerializerMethodField()
-    
-    class Meta:
-        model = Quiz
-        fields = (
-            'id', 'title', 'description', 'youtube_url',
-            'transcription', 'questions', 'question_count',
-            'created_at', 'updated_at'
-        )
-        read_only_fields = ('id', 'created_at', 'updated_at', 'transcription')
-    
-    def get_question_count(self, obj):
-        return obj.questions.count()
-    
-class QuizCreateSerializer(serializers.ModelSerializer):
-    """Serializer for creating a new quiz from YouTube URL"""
-    class Meta:
-        model = Quiz
-        fields = ('youtube_url', 'title', 'description')
 
-    def validate_youtube_url(self, value):
-        youtube_patterns = ['youtube.com', 'youtu.be', 'youtube-nocookie.com', 'm.youtube.com']
+class QuizCreateSerializer(serializers.Serializer):
+    """
+    Serializer for POST /api/quizzes/.
+    Spec expects { url } not { youtube_url }.
+    """
+    url = serializers.URLField()
+
+    def validate_url(self, value):
+        youtube_patterns = [
+            'youtube.com', 'youtu.be',
+            'youtube-nocookie.com', 'm.youtube.com',
+        ]
         if not any(pattern in value for pattern in youtube_patterns):
-            raise serializers.ValidationError("Must be a valid YouTube URL")
+            raise serializers.ValidationError("Must be a valid YouTube URL.")
         return value
-    
+
+
 class QuizUpdateSerializer(serializers.ModelSerializer):
-    """Serializer for updating quiz metadata only"""
+    """Serializer for PATCH /api/quizzes/{id}/ — title and description only."""
     class Meta:
         model = Quiz
         fields = ('title', 'description')

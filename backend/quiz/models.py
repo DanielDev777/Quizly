@@ -44,7 +44,8 @@ class Question(models.Model):
     difficulty = models.CharField(max_length=10, choices=DIFFICULTY_CHOICES, default='medium')
     order = models.IntegerField(default=0, help_text="Display order in the quiz")
     created_at = models.DateTimeField(auto_now_add=True)
-    
+    updated_at = models.DateTimeField(auto_now=True)
+
     class Meta:
         db_table = 'questions'
         ordering = ['order', 'created_at']

@@ -65,7 +65,7 @@ The frontend is a static site located in the `frontend/` folder. There are two w
 
 Django serves the frontend directly. After starting the backend server, open:
 ```
-http://localhost:8000
+http://localhost:8000/index.html
 ```
 
 **Option 2 — Live Server / separate file server**

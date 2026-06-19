@@ -163,6 +163,8 @@ CORS_ALLOWED_ORIGINS = [
 
 CORS_ALLOW_CREDENTIALS = True
 
+SECURE_REFERRER_POLICY = 'no-referrer-when-downgrade'
+
 # Media Files Configuration
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'

@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from quiz.models import Quiz, Question, Answer
+from quiz.services.youtube_service import get_youtube_embed_url
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -30,8 +31,12 @@ class QuizSerializer(serializers.ModelSerializer):
     Full quiz serializer matching the spec response shape:
     { id, title, description, created_at, updated_at, video_url, questions: [...] }
     """
-    video_url = serializers.CharField(source='youtube_url')
+    video_url = serializers.SerializerMethodField()
     questions = QuestionSerializer(many=True, read_only=True)
+
+    def get_video_url(self, obj):
+        """Return the YouTube embed URL derived from the stored video URL."""
+        return get_youtube_embed_url(obj.youtube_url)
 
     class Meta:
         model = Quiz

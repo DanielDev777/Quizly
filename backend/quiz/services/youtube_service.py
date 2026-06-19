@@ -1,8 +1,24 @@
 import os
+import re
 import tempfile
 from typing import Dict, Optional
 import yt_dlp
 import whisper
+
+_YOUTUBE_ID_PATTERNS = [
+    r'[?&]v=([^&\/#]+)',
+    r'youtu\.be/([^?&\/#]+)',
+    r'youtube(?:-nocookie)?\.com/(?:embed|v|e|shorts|live)/([^?&\/#]+)',
+]
+
+
+def get_youtube_embed_url(url: str) -> str:
+    """Convert any YouTube URL format to a youtube.com/embed/ID URL."""
+    for pattern in _YOUTUBE_ID_PATTERNS:
+        match = re.search(pattern, url)
+        if match:
+            return f'https://www.youtube-nocookie.com/embed/{match.group(1)}'
+    return url
 
 
 class YouTubeTranscriptionService:

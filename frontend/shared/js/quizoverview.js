@@ -12,7 +12,7 @@ async function init() {
   if (!CURRENTQUIZ) return;
   headlineInput.value = CURRENTQUIZ.title;
   descriptionInput.value = CURRENTQUIZ.description;
-  iFrame.src = getEmbededURL(CURRENTQUIZ.video_url);
+  iFrame.src = CURRENTQUIZ.video_url;
   QUIZZES = await loadQuizzes();
   await renderPreviousQuizzes();
   setupEventListeners();
@@ -79,14 +79,6 @@ function isOlderThan7Days(dateString) {
   );
   const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
   return date >= sevenDaysAgo && date < today;
-}
-
-function getEmbededURL(url) {
-  const match = url.match(/v=([^&]+)/);
-  if (match) {
-    return `https://www.youtube.com/embed/${match[1]}`;
-  }
-  return `https://placehold.co/450x250?text=Video+not+found`;
 }
 
 /**
